@@ -2,8 +2,8 @@ data "aws_iam_role" "ecs_task_execution" {
   name = "ecsTaskExecutionRole"
 }
 
-resource "aws_iam_role_policy" "ecs_ssm_parameter_access" {
-  name = "customer-file-delivery-ssm-access"
+resource "aws_iam_role_policy" "ecs_secrets_access" {
+  name = "customer-file-delivery-secrets-access"
   role = data.aws_iam_role.ecs_task_execution.name
 
   policy = jsonencode({
@@ -11,15 +11,14 @@ resource "aws_iam_role_policy" "ecs_ssm_parameter_access" {
 
     Statement = [
       {
-        Sid    = "ReadDatabasePassword"
+        Sid    = "ReadRdsPassword"
         Effect = "Allow"
 
         Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
+          "secretsmanager:GetSecretValue"
         ]
 
-        Resource = module.database_password_parameter.parameter_arn
+        Resource = data.aws_secretsmanager_secret.rds_password.arn
       }
     ]
   })
