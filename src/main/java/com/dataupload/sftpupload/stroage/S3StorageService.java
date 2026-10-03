@@ -1,5 +1,6 @@
-package com.dataupload.sftpupload.stroage;
+package com.dataupload.sftpupload.storage;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -11,21 +12,22 @@ import java.nio.file.Path;
 public class S3StorageService {
 
     private final S3Client s3Client;
+    private final String bucketName;
 
-    public S3StorageService(S3Client s3Client) {
+    public S3StorageService(
+            S3Client s3Client,
+            @Value("${app.s3.bucket-name}") String bucketName) {
+
         this.s3Client = s3Client;
+        this.bucketName = bucketName;
     }
 
-    public void uploadFile(
-            String bucketName,
-            String objectKey,
-            Path filePath) {
+    public void uploadFile(String objectKey, Path filePath) {
 
-        PutObjectRequest request =
-                PutObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(objectKey)
-                        .build();
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
 
         s3Client.putObject(
                 request,
@@ -33,8 +35,7 @@ public class S3StorageService {
         );
 
         System.out.println(
-                "File uploaded to S3: "
-                        + objectKey
+                "File uploaded to S3: s3://" + bucketName + "/" + objectKey
         );
     }
 }

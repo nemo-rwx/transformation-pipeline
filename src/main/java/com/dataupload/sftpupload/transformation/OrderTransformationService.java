@@ -4,6 +4,7 @@ import com.dataupload.sftpupload.entity.OrderEntity;
 import com.dataupload.sftpupload.event.CustomerCsvGeneratedEvent;
 import com.dataupload.sftpupload.event.CustomerCsvGeneratedKafkaProducer;
 import com.dataupload.sftpupload.repository.OrderRepository;
+import com.dataupload.sftpupload.storage.S3StorageService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,15 +20,18 @@ public class OrderTransformationService {
     private final OrderRepository orderRepository;
     private final OrderCsvGenerator csvGenerator;
     private final CustomerCsvGeneratedKafkaProducer kafkaProducer;
+    private final S3StorageService s3StorageService;
 
     public OrderTransformationService(
             OrderRepository orderRepository,
             OrderCsvGenerator csvGenerator,
-            CustomerCsvGeneratedKafkaProducer kafkaProducer) {
+            CustomerCsvGeneratedKafkaProducer kafkaProducer,
+            S3StorageService s3StorageService) {
 
         this.orderRepository = orderRepository;
         this.csvGenerator = csvGenerator;
         this.kafkaProducer = kafkaProducer;
+        this.s3StorageService = s3StorageService;
     }
 
     public String generateOrderExport(
@@ -44,28 +48,31 @@ public class OrderTransformationService {
         String csv = csvGenerator.generate(orders);
 
         try {
-            Path outputDirectory =
-                    Paths.get("generated-files");
-
+            Path outputDirectory = Paths.get("generated-files");
             Files.createDirectories(outputDirectory);
 
             String fileName =
-                    "ORDER_EXPORT_"
-                            + customerId
-                            + "_"
-                            + requestedDate
-                            + ".csv";
+                    "ORDER_EXPORT_" + customerId + "_" + requestedDate + ".csv";
 
-            Path filePath =
-                    outputDirectory.resolve(fileName);
+            Path filePath = outputDirectory.resolve(fileName);
 
             Files.writeString(filePath, csv);
 
             System.out.println(
-                    "CSV file generated: "
-                            + filePath.toAbsolutePath()
+                    "CSV file generated: " +
+                            filePath.toAbsolutePath()
             );
 
+            // Upload generated CSV to S3
+            String objectKey =
+                    "orders/" + requestedDate + "/" + fileName;
+
+            s3StorageService.uploadFile(
+                    objectKey,
+                    filePath
+            );
+
+            // Publish Kafka event after successful S3 upload
             CustomerCsvGeneratedEvent event =
                     new CustomerCsvGeneratedEvent(
                             requestId,
@@ -81,7 +88,6 @@ public class OrderTransformationService {
             return csv;
 
         } catch (IOException e) {
-
             throw new RuntimeException(
                     "Failed to write CSV file",
                     e

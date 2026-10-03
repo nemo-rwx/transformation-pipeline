@@ -1,0 +1,33 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 267807794622.dkr.ecr.us-east-1.amazonaws.com
+
+  build:
+    commands:
+      - echo "Building Spring Boot application..."
+      - mvn clean package -DskipTests
+
+      - echo "Building Docker image..."
+      - docker build -t customer-file-delivery:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+
+      - echo "Tagging Docker image..."
+      - docker tag customer-file-delivery:$CODEBUILD_RESOLVED_SOURCE_VERSION 267807794622.dkr.ecr.us-east-1.amazonaws.com/customer-file-delivery:$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      - docker push 267807794622.dkr.ecr.us-east-1.amazonaws.com/customer-file-delivery:$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+      - echo "Docker image pushed successfully."
+
+artifacts:
+  files:
+    - target/*.jar
