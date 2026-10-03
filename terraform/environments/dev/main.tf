@@ -16,3 +16,10 @@ module "customer_database" {
   engine_version = "17"
   instance_class = "db.t3.micro"
 }
+
+module "database_password_parameter" {
+  source = "../../modules/ssm"
+
+  parameter_name = "customer-file-delivery/dev/rds-v2"
+  parameter_value = var.db_password
+}
