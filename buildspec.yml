@@ -16,4 +16,4 @@ phases:
       - cd terraform/environments/dev
       - terraform init -backend=false
       - terraform validate
-      - echo "Terraform validation completed."alidation completed."
+      - echo "Terraform validation completed."
