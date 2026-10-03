@@ -19,7 +19,8 @@ phases:
       - terraform validate
 
       - echo "Planning Terraform bootstrap..."
-      - terraform plan
+      - terraform plan -out=tfplan
+
 
       - echo "Validating Terraform dev environment..."
       - cd ../environments/dev
