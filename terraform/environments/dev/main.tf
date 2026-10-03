@@ -4,12 +4,6 @@ module "customer_files_bucket" {
   bucket_name = var.bucket_name
 }
 
-module "customer_files_bucket" {
-  source = "../../modules/s3"
-
-  bucket_name = var.bucket_name
-}
-
 module "customer_database" {
   source = "../../modules/rds"
 

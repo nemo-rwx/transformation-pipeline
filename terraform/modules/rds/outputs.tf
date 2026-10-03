@@ -1,10 +1,10 @@
 output "db_instance_endpoint" {
-  description = "RDS PostgreSQL endpoint"
+  description = "RDS PostgresSQL endpoint"
   value       = aws_db_instance.this.address
 }
 
 output "db_instance_port" {
-  description = "RDS PostgreSQL port"
+  description = "RDS PostgresSQL port"
   value       = aws_db_instance.this.port
 }
 
