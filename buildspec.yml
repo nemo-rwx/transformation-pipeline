@@ -20,6 +20,8 @@ phases:
 
       - echo "Planning Terraform bootstrap..."
       - terraform plan -out=tfplan
+      - echo "Applying Terraform bootstrap..."
+      - terraform apply -auto-approve tfplan
 
 
       - echo "Validating Terraform dev environment..."
