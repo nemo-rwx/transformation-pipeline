@@ -17,13 +17,11 @@ phases:
       - cd terraform/bootstrap
       - terraform init -backend=false
       - terraform validate
-      - terraform plan -out=tfplan
-      - echo "Applying Terraform bootstrap..."
-      - terraform apply -auto-approve tfplan
 
       - echo "Initializing Terraform dev environment with remote state..."
       - cd ../environments/dev
       - terraform init
       - terraform validate
+      - terraform plan -out=tfplan
 
-      - echo "Terraform validation completed."
+      - echo "Terraform validation and planning completed."
