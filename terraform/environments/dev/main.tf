@@ -20,6 +20,7 @@ module "customer_database" {
 module "database_password_parameter" {
   source = "../../modules/ssm"
 
-  parameter_name = "customer-file-delivery/dev/rds-v2"
-  parameter_value = var.db_password
+  parameter_name    = "/customer-file-delivery/dev/rds-v2"
+  parameter_value   = var.db_password
+  parameter_version = 1
 }
