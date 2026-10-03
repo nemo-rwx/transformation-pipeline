@@ -12,8 +12,12 @@ phases:
     commands:
       - echo "Terraform version:"
       - terraform version
-      - echo "Starting Terraform validation..."
-      - cd terraform/environments/dev
+      - echo "Validating Terraform bootstrap..."
+      - cd terraform/bootstrap
+      - terraform init -backend=false
+      - terraform validate
+      - echo "Validating Terraform dev environment..."
+      - cd ../environments/dev
       - terraform init -backend=false
       - terraform validate
       - echo "Terraform validation completed."
